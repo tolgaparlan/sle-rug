@@ -21,19 +21,19 @@ syntax Question
 // and use C/Java style precedence rules (look it up on the internet)
 syntax Expr 
   = Id \ "true" \ "false" // true/false are reserved keywords.
-  | plus: Expr l "+" Expr r
-  | minus: Expr l "-" Expr r
-  | mul: Expr l "*" Expr r
-  | div: Expr l "/" Expr r
-  | and: Expr l "&&" Expr r
-  | or: Expr l "||" Expr r
-  | negation: "!" Expr 
+  > left plus: Expr l "+" Expr r
+  > left minus: Expr l "-" Expr r
+  > left mul: Expr l "*" Expr r
+  > left div: Expr l "/" Expr r
+  | left and: Expr l "&&" Expr r
+  | left or: Expr l "||" Expr r
+  > negation: "!" Expr 
   | larger: Expr l "\>" Expr r
   | smaller: Expr l "\<" Expr r
   | largerequal: Expr l "\>=" Expr r
   | smallerequal: Expr l "\<=" Expr r
-  | equal: Expr l "==" Expr r
-  | notequal: Expr l "!=" Expr r
+  | left equal: Expr l "==" Expr r
+  | left notequal: Expr l "!=" Expr r
   | number: Int
   ;
  
