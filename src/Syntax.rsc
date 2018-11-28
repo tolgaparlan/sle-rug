@@ -24,19 +24,19 @@ syntax Expr
   = Id \ "true" \ "false" // true/false are reserved keywords.
   | boolean: Bool
   | number: Int
-  > negation: "!" Expr
+  > left or: Expr l "||" Expr r
   > left and: Expr l "&&" Expr r
-  | left or: Expr l "||" Expr r
-  | larger: Expr l "\>" Expr r
+  > left equal: Expr l "==" Expr r
+  | left notequal: Expr l "!=" Expr r
+  > larger: Expr l "\>" Expr r
   | smaller: Expr l "\<" Expr r
   | largerequal: Expr l "\>=" Expr r
-  | smallerequal: Expr l "\<=" Expr r
-  | left equal: Expr l "==" Expr r
-  | left notequal: Expr l "!=" Expr r
-  > left mul: Expr l "*" Expr r
-  | left div: Expr l "/" Expr r 
+  | smallerequal: Expr l "\<=" Expr r 
   > left plus: Expr l "+" Expr r
   | left minus: Expr l "-" Expr r
+  > left mul: Expr l "*" Expr r
+  | left div: Expr l "/" Expr r
+  > negation: "!" Expr
   ;
  
 syntax Type 
