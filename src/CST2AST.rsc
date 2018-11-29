@@ -22,19 +22,34 @@ AForm cst2ast(start[Form] sf) {
 }
 
 AQuestion cst2ast(Question q) {
-  throw "Not yet implemented";
+  switch(q){
+  	case (Question) `<Id x>:<Type t>`: return 
+  	default: throw "Unhandled Question <q>";
+  }
+  
 }
+
+AType cst2ast((Type)`<Id x>`) = ref("<x>", src=x@loc);
 
 AExpr cst2ast(Expr e) {
   switch (e) {
     case (Expr)`<Id x>`: return ref("<x>", src=x@\loc);
-    
-    // etc.
+    case (Expr)`<Bool x>`: return ref("<x>", src=x@\loc);
+    case (Expr)`<Int x>`: return ref("<x>", src=x@\loc);
+    case (Expr)`!<Expr e1>`: return !expr(e1);
+    case (Expr)`<Expr e1>||<Expr e2>`: return (cst2ast(e1) || cst2ast(e2));
+    case (Expr)`<Expr e1>&&<Expr e2>`: return (cst2ast(e1) && cst2ast(e2));
+    case (Expr)`<Expr e1>==<Expr e2>`: return (cst2ast(e1) == cst2ast(e2));
+    case (Expr)`<Expr e1>!=<Expr e2>`: return (cst2ast(e1) != cst2ast(e2));
+    case (Expr)`<Expr e1>\><Expr e2>`: return (cst2ast(e1) > cst2ast(e2));
+    case (Expr)`<Expr e1>\<<Expr e2>`: return (cst2ast(e1) < cst2ast(e2));
+    case (Expr)`<Expr e1>\>=<Expr e2>`: return (cst2ast(e1) >= cst2ast(e2));
+    case (Expr)`<Expr e1>\<=<Expr e2>`: return (cst2ast(e1) <= cst2ast(e2));
+    case (Expr)`<Expr e1>+<Expr e2>`: return (cst2ast(e1) + cst2ast(e2));
+    case (Expr)`<Expr e1>-<Expr e2>`: return (cst2ast(e1) - cst2ast(e2));
+    case (Expr)`<Expr e1>*<Expr e2>`: return (cst2ast(e1) * cst2ast(e2));
+    case (Expr)`<Expr e1>/<Expr e2>`: return (cst2ast(e1) / cst2ast(e2));
     
     default: throw "Unhandled expression: <e>";
   }
-}
-
-AType cst2ast(Type t) {
-  throw "Not yet implemented";
 }
