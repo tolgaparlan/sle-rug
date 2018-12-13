@@ -25,10 +25,10 @@ AForm cst2ast(start[Form] sf) {
 
 AQuestion cst2ast(Question q) {
   switch(q){
-  	case (Question) `<Id x>:<Type t>`: 
-  	  return qnormal("<x>",cst2ast(t));
-  	case (Question) `<Id x>:<Type t>=(<Expr e>)`: 
-  	  return qcomputed("<x>",cst2ast(t),cst2ast(e));
+  	case (Question) `<Str s> <Id x>:<Type t>`: 
+  	  return qnormal("<s>", "<x>", x@\loc, cst2ast(t));
+  	case (Question) `<Str s> <Id x>:<Type t>=<Expr e>`: 
+  	  return qcomputed("<s>", "<x>", x@\loc, cst2ast(t),cst2ast(e));
   	case (Question) `if(<Expr e>){<Question* qs>}`: 
   	  return qifthen(cst2ast(e), [ cst2ast(q) | Question q <- qs ]);
   	case (Question) `if(<Expr e>){<Question* qs1>} else {<Question* qs2>}`: 

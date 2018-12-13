@@ -22,6 +22,11 @@ import AST;
  */
  
 AForm flatten(AForm f) {
+  for(/AQuestion q := f){
+    switch(q){
+      case (Question) ``:
+    }
+  }
   return f; 
 }
 

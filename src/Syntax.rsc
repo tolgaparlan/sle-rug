@@ -12,7 +12,7 @@ start syntax Form = "form" Id "{" Question* "}";
 // TODO: question, computed question, block, if-then-else, if-then 
 syntax Question
 	= normal: Str Id":" Type
-	| computed: Str Id":" Type "=" "("Expr")" 
+	| computed: Str Id":" Type "=" Expr 
 	| ifthen: "if" "("Expr")" "{" Question* "}"
 	| ifthenelse: "if" "("Expr")" "{" Question* "}" "else" "{" Question* "}" ; 
 
