@@ -14,21 +14,46 @@ data Type
 // the type environment consisting of defined questions in the form 
 alias TEnv = rel[loc def, str name, str label, Type \type];
 
+// set[tuple[loc def, str name, str label, Type \type]]
+
+// convert AType to Type
+Type getType(AType t) {
+	switch(t){
+		case string(): return tstr();
+		case integer(): return tint();
+		case boolean(): return tbool();
+	}
+}
+
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
-  return {}; 
+  TEnv collection = {};
+  
+  for(/AQuestion q := f.questions) {
+  	if(q is qnormal || q is qcomputed)
+  		collection += {<q.nref, q.name, q.label, getType(q.\type)>};
+  }
+  
+  return collection; 
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
-  return {}; 
+  set[Message] messages = {};
+
+  for(/AQuestion q := f.questions) {
+  	if(q is qnormal || q is qcomputed)
+  		messages += check(q, tenv, useDef);
+  }
+
+  return messages;
 }
 
 // - produce an error if there are declared questions with the same name but different types.
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) {
-  return {}; 
+  return {warning("kek", q.nref)}; 
 }
 
 // Check operand compatibility with operators.
