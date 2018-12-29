@@ -2,6 +2,7 @@ module Eval
 
 import AST;
 import Resolve;
+import IO;
 
 /*
  * Implement big-step semantics for QL
@@ -23,11 +24,31 @@ alias VEnv = map[str name, Value \value];
 // Modeling user input
 data Input
   = input(str question, Value \value);
-  
+
 // produce an environment which for each question has a default value
 // (e.g. 0 for int, "" for str etc.)
+Value defaultValue(AType \type) {
+  switch (\type) {
+    case integer():
+      return vint(0);
+    case boolean():
+      return vbool(false);
+    case string():
+      return vstr("");
+  }
+}
+
 VEnv initialEnv(AForm f) {
-  return ();
+	VEnv venv = ();
+	for(/AQuestion q := f.questions) {
+		switch(q){
+			case qnormal(str _, str name, loc _, AType \type):
+				venv = venv + (name: defaultValue(\type));
+			case qcomputed(str _, str name, loc _, AType \type, AExpr expr):
+				venv = venv + (name: defaultValue(\type));
+		}
+	}
+    return venv;
 }
 
 
@@ -40,20 +61,82 @@ VEnv eval(AForm f, Input inp, VEnv venv) {
 }
 
 VEnv evalOnce(AForm f, Input inp, VEnv venv) {
-  return (); 
+  for(AQuestion q <- f.questions)
+    venv = eval(q, inp, venv);
+  return venv;
 }
+
 
 VEnv eval(AQuestion q, Input inp, VEnv venv) {
   // evaluate conditions for branching,
   // evaluate inp and computed questions to return updated VEnv
-  return (); 
+  
+  
+  // should we check for the name == inp.question here??  
+  switch(q) {
+    case qnormal(str _, str name, loc nref, AType \type):
+    	if(name == inp.question)
+    		venv[name] = inp.\value;
+    		
+    case qcomputed(str _, str name, loc _, AType \type, AExpr expr):
+    	venv[name] = eval(expr, venv);
+    		
+    case qifthen(AExpr expr, list[AQuestion] questions):
+      if(eval(expr, venv).b)
+        for(AQuestion q <- questions) venv = eval(q, inp, venv);
+    
+    
+    case qifthenelse(AExpr expr, list[AQuestion] questions, list[AQuestion] questions2):
+      if(eval(cond, venv).b)
+        for(AQuestion q <- questions) venv = eval(q, inp, venv);
+      else
+        for(AQuestion q <- questions2) venv = eval(q, inp, venv);
+  }
+  
+  return venv; 
 }
 
 Value eval(AExpr e, VEnv venv) {
   switch (e) {
     case ref(str x): return venv[x];
     
-    // etc.
+    case number(int i): return vint(i);
+    case boolean(bool b): return vbool(b);
+    case string(str s): return vstr(s);
+    
+    case div(AExpr e1, AExpr e2):
+    	return vint(eval(e1, venv).n / eval(e2, venv).n);
+    case mul(AExpr e1, AExpr e2):
+    	return vint(eval(e1, venv).n * eval(e2, venv).n);
+    case plus(AExpr e1, AExpr e2):
+    	return vint(eval(e1, venv).n + eval(e2, venv).n);
+    case minus(AExpr e1, AExpr e2):
+    	return vint(eval(e1, venv).n - eval(e2, venv).n);
+      
+    case smaller(AExpr e1, AExpr e2): 
+      return vbool(eval(e1, venv).n < eval(e2, venv).n);
+    case smallerequal(AExpr e1, AExpr e2): 
+      return vbool(eval(e1, venv).n <= eval(e2, venv).n);
+    case larger(AExpr e1, AExpr e2): 
+      return vbool(eval(e1, venv).n > eval(e2, venv).n);
+    case largerequal(AExpr e1, AExpr e2): 
+      return vbool(eval(e1, venv).n >= eval(e2, venv).n);
+      
+    case or(AExpr e1, AExpr e2):
+    	return vbool(eval(e1, venv).b || eval(e2, venv).b);
+  	case and(AExpr e1, AExpr e2):
+  		return vbool(eval(e1, venv).b && eval(e2, venv).b);
+  	case negation(AExpr e1):
+  		return vbool(!e1.b);
+  	
+  	case equal(AExpr e1, AExpr e2):
+  		switch (eval(e1, venv)) {
+	        case vint(int n): return vbool(eval(e1, venv).i == eval(rhse2, venv).i);
+	        case vstr(str s): return vbool(eval(e1, venv).s == eval(rhse2, venv).s);
+	        case vbool(bool b): return vbool(eval(e1, venv).b == eval(rhse2, venv).b);
+	      }
+  	case notequal(AExpr e1, AExpr e2):
+  		return vbool(!eval(equal(e1, e2)).b);
     
     default: throw "Unsupported expression <e>";
   }

@@ -37,9 +37,9 @@ AQuestion cst2ast(Question q) {
   }
 }
 
-AType cst2ast((Type)`string`) = boolean();
+AType cst2ast((Type)`string`) = string();
 AType cst2ast((Type)`integer`) = integer();
-AType cst2ast((Type)`boolean`) = string();
+AType cst2ast((Type)`boolean`) = boolean();
 
 AExpr cst2ast(Expr e) {
   switch (e) {

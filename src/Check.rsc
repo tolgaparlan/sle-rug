@@ -4,7 +4,6 @@ import AST;
 import Resolve;
 import Message; // see standard library
 import List;
-import IO;
 
 data Type
   = tint()
