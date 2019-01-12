@@ -19,20 +19,20 @@ import String;
 AForm cst2ast(start[Form] sf) {
   Form f = sf.top; // remove layout before and after form
   switch(f){
-  	case (Form) `form <Id x> { <Question* qs> }` : return form("<x>", [ cst2ast(q) | Question q <- qs ]);
+  	case (Form) `form <Id x> { <Question* qs> }` : return form("<x>", [ cst2ast(q) | Question q <- qs ], src=f@\loc);
   }
 }
 
 AQuestion cst2ast(Question q) {
   switch(q){
   	case (Question) `<Str s> <Id x>:<Type t>`: 
-  	  return qnormal("<s>", "<x>", x@\loc, cst2ast(t));
+  	  return qnormal("<s>", "<x>", cst2ast(t), src=q@\loc);
   	case (Question) `<Str s> <Id x>:<Type t>=<Expr e>`: 
-  	  return qcomputed("<s>", "<x>", x@\loc, cst2ast(t),cst2ast(e));
+  	  return qcomputed("<s>", "<x>", cst2ast(t),cst2ast(e), src=q@\loc);
   	case (Question) `if(<Expr e>){<Question* qs>}`: 
-  	  return qifthen(cst2ast(e), [ cst2ast(q) | Question q <- qs ]);
+  	  return qifthen(cst2ast(e), [ cst2ast(q) | Question q <- qs ], src=q@\loc);
   	case (Question) `if(<Expr e>){<Question* qs1>} else {<Question* qs2>}`: 
-  	  return qifthenelse(cst2ast(e), [ cst2ast(q) | Question q <- qs1 ], [ cst2ast(q) | Question q <- qs2 ]);
+  	  return qifthenelse(cst2ast(e), [ cst2ast(q) | Question q <- qs1 ], [ cst2ast(q) | Question q <- qs2 ], src=q@\loc);
   	default: throw "Unhandled Question: <q>";
   }
 }

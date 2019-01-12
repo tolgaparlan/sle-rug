@@ -71,14 +71,12 @@ VEnv eval(AQuestion q, Input inp, VEnv venv) {
   // evaluate conditions for branching,
   // evaluate inp and computed questions to return updated VEnv
   
-  
-  // should we check for the name == inp.question here??  
   switch(q) {
-    case qnormal(str _, str name, loc nref, AType \type):
+    case qnormal(str _, str name, AType \type):
     	if(name == inp.question)
     		venv[name] = inp.\value;
     		
-    case qcomputed(str _, str name, loc _, AType \type, AExpr expr):
+    case qcomputed(str _, str name, AType \type, AExpr expr):
     	venv[name] = eval(expr, venv);
     		
     case qifthen(AExpr expr, list[AQuestion] questions):
@@ -131,7 +129,7 @@ Value eval(AExpr e, VEnv venv) {
   	
   	case equal(AExpr e1, AExpr e2):
   		switch (eval(e1, venv)) {
-	        case vint(int n): return vbool(eval(e1, venv).i == eval(rhse2, venv).i);
+	        case vint(int n): return vbool(eval(e1, venv).n == eval(rhse2, venv).n);
 	        case vstr(str s): return vbool(eval(e1, venv).s == eval(rhse2, venv).s);
 	        case vbool(bool b): return vbool(eval(e1, venv).b == eval(rhse2, venv).b);
 	      }

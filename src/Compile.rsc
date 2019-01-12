@@ -5,6 +5,12 @@ import Resolve;
 import IO;
 import lang::html5::DOM; // see standard library
 
+//import TheirDOM;
+import ParseTree;
+import Syntax;
+import CST2AST; 
+import Eval;
+
 /*
  * Implement a compiler for QL to HTML and Javascript
  *
@@ -23,10 +29,146 @@ void compile(AForm f) {
   writeFile(f.src[extension="html"].top, toString(form2html(f)));
 }
 
+void aaa(){
+	compile(cst2ast(parse(#start[Form], |project://QL/examples/x.myql|)));
+}
+
 HTML5Node form2html(AForm f) {
-  return html();
+	return html(
+		head(
+			script(src("jquery-3.3.1.min.js")),
+			script(src("x.js")), 
+			script(src("kek.js"))),
+		body(form(questions2html(f.questions))));
+}
+
+HTML5Node questions2html (list[AQuestion] qs){
+	list[HTML5Node] nodes = [];
+	for(AQuestion q <- qs){
+		switch(q){
+			case qnormal(str l, str n, AType t):{
+				HTML5Node questionLabel = h3(l);
+				HTML5Node inputBox;
+				switch(t){
+					case string():
+						inputBox = input(name(n));
+					case integer():
+						inputBox = input(name(n), \type("number"));
+					case boolean():
+						inputBox = div([input(name(n), id(n + "-true"), \value("true"), \type("radio")),
+									label(\for(n + "-true"), "True"), 
+									input(name(n), id(n + "-true"), \value("false"), \type("radio")),
+									label(\for(n + "-false"), "False")]);
+				}
+				
+				nodes += div(questionLabel, inputBox);
+			}
+			case qcomputed(str l, str n, AType _, AExpr _):
+				nodes += div(h3(l), input(name(n), readonly("readonly")));
+			case qifthen(AExpr expr, list[AQuestion] questions):
+				nodes += div(questions2html(q.questions), class("toggled"), about(expr2str(expr)));
+			case qifthenelse(AExpr expr, list[AQuestion] questions, list[AQuestion] questions2):{
+				nodes += div(questions2html(q.questions), class("toggled"), about(expr2str(expr)));
+				nodes += div(questions2html(q.questions2), class("toggled"), about(expr2str(negation(expr))));
+			}
+		}
+	}
+	return div(nodes);
+}
+
+str expr2str(AExpr expr){
+  switch (expr) {
+    case ref(str x):
+      return "(<x>)";
+	case or(AExpr e1, AExpr e2):
+	  return expr2str(e1) + "||" + expr2str(e2);
+    case and(AExpr e1, AExpr e2):
+      return expr2str(e1) + "&&" + expr2str(e2);
+    case equal(AExpr e1, AExpr e2):
+  	  return expr2str(e1) + "==" + expr2str(e2);
+  	case notequal(AExpr e1, AExpr e2):
+	  return expr2str(e1) + "!=" + expr2str(e2);      
+    case larger(AExpr e1, AExpr e2):
+      return expr2str(e1) + "\>" + expr2str(e2);
+    case smaller(AExpr e1, AExpr e2):
+      return expr2str(e1) + "\<" + expr2str(e2);
+    case largerequal(AExpr e1, AExpr e2):
+      return expr2str(e1) + "\>=" + expr2str(e2);
+    case smallerequal(AExpr e1, AExpr e2):
+      return expr2str(e1) + "\<=" + expr2str(e2);
+    case plus(AExpr e1, AExpr e2):
+      return expr2str(e1) + "+" + expr2str(e2);
+    case minus(AExpr e1, AExpr e2):
+	  return expr2str(e1) + "-" + expr2str(e2);
+    case mul(AExpr e1, AExpr e2):
+      return expr2str(e1) + "*" + expr2str(e2);  
+    case div(AExpr e1, AExpr e2):
+      return expr2str(e1) + "/" + expr2str(e2);
+    case negation(AExpr e1):
+      return "!" + expr2str(e1);
+  }
+}
+
+
+// n is needed to avoid having multiple _conditional keys with exact
+// same name 
+str createEvalTree(list[AQuestion] qs) {
+
+	str tree = "{";
+	
+	for(AQuestion q <- qs){
+		switch(q) {
+		    case qnormal(str _, str name, AType _):
+		    	tree += "<name>: undefined,";
+		    case qcomputed(str _, str name, AType _, AExpr expr):
+		    	tree += "<name>: \"<expr2str(expr)>\",";
+		    case qifthen(AExpr expr, list[AQuestion] questions):{
+		    	tree += "_conditional: {condition: \"<expr2str(expr)>\",";
+		    	
+		    	tree += "_if: ";
+		    	tree += createEvalTree(questions);
+		    	tree += ",_else: {}";
+		    	
+		    	tree += "},";
+		    }
+		    case qifthenelse(AExpr expr, list[AQuestion] questions, list[AQuestion] questions2):{
+		    	tree += "_conditional: {condition: \"<expr2str(expr)>\",";
+		    	
+		    	tree += "_if: ";
+		    	tree += createEvalTree(questions);
+		    	tree += ",_else: ";
+		    	tree += createEvalTree(questions2);
+		    	
+		    	tree += "},";
+		    } 
+		  }
+	}
+  
+ 	return tree + "}"; 
+}
+
+value defaultJSValue(AType \type) {
+  switch (\type) {
+    case integer():
+      return 0;
+    case boolean():
+      return false;
+    case string():
+      return "\"\"";
+  }
 }
 
 str form2js(AForm f) {
-  return "";
+	rel[str name, AType \type] names = {};
+
+  	for(/AQuestion q := f.questions) {
+  		if(q is qnormal || q is qcomputed)
+  			names += {<q.name, q.\type>};
+	}
+	
+	str vEnv = "var vEnv = {";
+	for(<str name, AType \type> <- names) vEnv += "<name>: <defaultJSValue(\type)>,";
+	vEnv += "};";
+	
+ 	return vEnv + "var tree =" + createEvalTree(f.questions);
 }

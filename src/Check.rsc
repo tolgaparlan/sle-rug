@@ -33,7 +33,7 @@ TEnv collect(AForm f) {
   
   for(/AQuestion q := f.questions) {
   	if(q is qnormal || q is qcomputed)
-  		collection += {<q.nref, q.name, q.label, getType(q.\type)>};
+  		collection += {<q.src, q.name, q.label, getType(q.\type)>};
   }
   
   return collection; 
@@ -55,8 +55,8 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) =
-	{error("Declared elsewhere with different type", q.nref) | !isEmpty([1 |e <- tenv, e.name == q.name && e.\type != getType(q.\type) ])}
-	+ {warning("Duplicate labels", q.nref) | !isEmpty([1 | e <- tenv, e.label == q.label && e.name != q.name])}
+	{error("Declared elsewhere with different type", q.src) | !isEmpty([1 |e <- tenv, e.name == q.name && e.\type != getType(q.\type) ])}
+	+ {warning("Duplicate labels", q.src) | !isEmpty([1 | e <- tenv, e.label == q.label && e.name != q.name])}
 	+ computedQuestionCheck(q, tenv, useDef);
 
 set[Message] computedQuestionCheck(AQuestion q, TEnv tenv, UseDef useDef) {
@@ -64,7 +64,7 @@ set[Message] computedQuestionCheck(AQuestion q, TEnv tenv, UseDef useDef) {
 		return {};
 	}
 	
-	return {error("Declared type differs from the expression", q.nref) | typeOf(q.expr, tenv, useDef) != getType(q.\type) }
+	return {error("Declared type differs from the expression", q.src) | typeOf(q.expr, tenv, useDef) != getType(q.\type) }
 	 + check(q.expr, tenv, useDef);
 }
 

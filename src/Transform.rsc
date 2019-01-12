@@ -2,6 +2,7 @@ module Transform
 
 import Resolve;
 import AST;
+import IO;
 
 /* 
  * Transforming QL forms
@@ -10,7 +11,13 @@ import AST;
  
 /* Normalization:
  *  wrt to the semantics of QL the following
- *     q0: "" int; if (a) { if (b) { q1: "" int; } q2: "" int; }
+ *     q0: "" int; 
+ *     if (a) {
+ *       if (b) {
+ *         q1: "" int;
+ *       } 
+ *       q2: "" int; 
+ *     }
  *
  *  is equivalent to
  *     if (true) q0: "" int;
@@ -22,26 +29,27 @@ import AST;
  */
  
 AForm flatten(AForm f) {
-  for(/AQuestion q := f){
-    switch(q){
-      case (Question) ``:
-    }
-  }
-  return f; 
+  return form(f.name, flattenQ(f.questions, boolean(true))); 
 }
 
-/* Rename refactoring:
- *
- * Write a refactoring transformation that consistently renames all occurrences of the same name.
- * Use the results of name resolution to find the equivalence class of a name.
- *
- * Bonus: do it on concrete syntax trees.
- */
- 
- AForm rename(AForm f, loc useOrDef, str newName, UseDef useDef) {
-   return f; 
- } 
- 
+list[AQuestion] flattenQ(list[AQuestion] questions, AExpr expr){
+
+  list[AQuestion] newQuestions = [];
+  for(AQuestion q <- questions){
+    if(q is qnormal || q is qcomputed) newQuestions += qifthen(expr, [q]);
+    if(q is qifthen || q is qifthenelse) {
+    	if(expr != boolean(true))
+			q.expr = and(q.expr, expr);    	
+    	
+    	newQuestions += flattenQ(q.questions, q.expr);
+    }
+    if(q is qifthenelse){
+     newQuestions += flattenQ(q.questions2, negation(q.expr));
+    }
+  }
+  return newQuestions; 
+}
+
  
  
 
