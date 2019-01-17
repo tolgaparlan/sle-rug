@@ -1,23 +1,3 @@
-// var tree = {
-//   kek: undefined,
-//   kek2: "kek + 12",
-//   hasBoughtHouse: undefined,
-//   hasMaintLoan: undefined,
-//   hasSoldHouse: undefined,
-
-//   _conditional_1: { // DON'T FORGET TO ITERATE NUMBERS
-//     condition: "hasSoldHouse",
-//     _if: {
-//       sellingPrice: undefined,
-//       privateDebt: undefined,
-//       valueResidue: "kek - privateDebt"
-//     },
-//     _else: {}
-//   }
-// }
-
-//  var vEnv = { kek: 0, kek2: 0, hasBoughtHouse: false, hasMaintLoan: false, hasSoldHouse: false, sellingPrice: 0, privateDebt: 0, valueResidue: 0 };
-
 //input:{name, value}
 function evalTree(treeLevel, input) {
   if (!treeLevel) {
@@ -40,6 +20,7 @@ function evalTree(treeLevel, input) {
   });
 }
 
+// evaluate and expression
 function evalExpr(expr) {
   eval("with (vEnv) {var result = (" + expr + ")}");
   if (result === "true") {
@@ -50,6 +31,7 @@ function evalExpr(expr) {
   return result;
 }
 
+// check if the old and new value envs are different
 function isDifferent(old, vEnv) {
   var different = false;
   Object.keys(old).forEach(function (key) {
@@ -98,7 +80,7 @@ function update() {
 }
 
 $(document).ready(function () {
-  update()
+  solve()
   $("form").change(function (e) {
     solve(e.target);
   });

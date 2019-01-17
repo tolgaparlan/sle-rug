@@ -32,7 +32,7 @@ void compile(AForm f) {
 }
 
 void aaa(){
-	compile(cst2ast(parse(#start[Form], |project://QL/examples/binary.myql|)));
+	compile(cst2ast(parse(#start[Form], |project://QL/examples/a.myql|)));
 }
 
 HTML5Node form2html(AForm f) {
@@ -83,7 +83,7 @@ str expr2str(AExpr expr){
     case ref(str x):
       return "(<x>)";
     case string(str s):
-      return "\"" + s + "\"";
+      return "\'" + s + "\'";
     case boolean(bool b):
       return toString(b);
     case number(int n):
@@ -134,7 +134,7 @@ str createEvalTree(list[AQuestion] qs) {
 		    case qnormal(str _, str name, AType _):
 		    	tree += "<name>: undefined,";
 		    case qcomputed(str _, str name, AType _, AExpr expr):
-		    	tree += "<name>: <expr2str(expr)>,";
+		    	tree += "<name>: \"<expr2str(expr)>\",";
 		    case qifthen(AExpr expr, list[AQuestion] questions):{
 		    	tree += "_conditional_<arbInt(999999)>: {condition: \"<expr2str(expr)>\",";
 		    	
