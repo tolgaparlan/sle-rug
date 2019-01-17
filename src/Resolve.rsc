@@ -30,7 +30,8 @@ Use uses(AForm f) {
 Def defs(AForm f) {
   Def d = {};
   for (/AQuestion q := f, q has name){
-    d += { <q.name, q.src> };
+  	if(q is qnormal || q is qcomputed)
+    	d += { <q.name, q.nameSource> };
   }
   return d; 
 }

@@ -2,13 +2,16 @@ module Compile
 
 import AST;
 import Resolve;
-import IO;
 import lang::html5::DOM; // see standard library
 
 import ParseTree;
 import Syntax;
 import CST2AST; 
 import Eval;
+import util::Math;
+import Boolean;
+
+import IO;
 
 /*
  * Implement a compiler for QL to HTML and Javascript
@@ -29,16 +32,16 @@ void compile(AForm f) {
 }
 
 void aaa(){
-	compile(cst2ast(parse(#start[Form], |project://QL/examples/x.myql|)));
+	compile(cst2ast(parse(#start[Form], |project://QL/examples/binary.myql|)));
 }
 
 HTML5Node form2html(AForm f) {
 	return html(
 		head(
 			script(src("jquery-3.3.1.min.js")),
-			script(src("x.js")), 
-			script(src("kek.js"))),
-		body(form(questions2html(f.questions))));
+			script(src(f.src[extension="js"].file)), 
+			script(src("index.js"))),
+		body(h1(f.name), form(questions2html(f.questions)), button("Submit")));
 }
 
 HTML5Node questions2html (list[AQuestion] qs){
@@ -79,6 +82,12 @@ str expr2str(AExpr expr){
   switch (expr) {
     case ref(str x):
       return "(<x>)";
+    case string(str s):
+      return "\"" + s + "\"";
+    case boolean(bool b):
+      return toString(b);
+    case number(int n):
+      return toString(n);
 	case or(AExpr e1, AExpr e2):
 	  return expr2str(e1) + "||" + expr2str(e2);
     case and(AExpr e1, AExpr e2):
@@ -107,10 +116,15 @@ str expr2str(AExpr expr){
       return "!" + expr2str(e1);
   }
 }
-
-
-// n is needed to avoid having multiple _conditional keys with exact
-// same name 
+//
+//str getFirstQuestionName(list[AQuestion] questions){
+//	if(isEmpty(questions)){
+//		return "empty";
+//	}
+//	
+//	return questions[
+//}
+ 
 str createEvalTree(list[AQuestion] qs) {
 
 	str tree = "{";
@@ -120,9 +134,9 @@ str createEvalTree(list[AQuestion] qs) {
 		    case qnormal(str _, str name, AType _):
 		    	tree += "<name>: undefined,";
 		    case qcomputed(str _, str name, AType _, AExpr expr):
-		    	tree += "<name>: \"<expr2str(expr)>\",";
+		    	tree += "<name>: <expr2str(expr)>,";
 		    case qifthen(AExpr expr, list[AQuestion] questions):{
-		    	tree += "_conditional: {condition: \"<expr2str(expr)>\",";
+		    	tree += "_conditional_<arbInt(999999)>: {condition: \"<expr2str(expr)>\",";
 		    	
 		    	tree += "_if: ";
 		    	tree += createEvalTree(questions);
@@ -131,7 +145,7 @@ str createEvalTree(list[AQuestion] qs) {
 		    	tree += "},";
 		    }
 		    case qifthenelse(AExpr expr, list[AQuestion] questions, list[AQuestion] questions2):{
-		    	tree += "_conditional: {condition: \"<expr2str(expr)>\",";
+		    	tree += "_conditional_<arbInt(999999)>: {condition: \"<expr2str(expr)>\",";
 		    	
 		    	tree += "_if: ";
 		    	tree += createEvalTree(questions);

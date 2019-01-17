@@ -3,6 +3,9 @@ module Syntax
 extend lang::std::Layout;
 extend lang::std::Id;
 
+import Resolve;
+import IO;
+
 /*
  * Concrete syntax of QL
  */
@@ -25,7 +28,8 @@ syntax Expr
   | boolean: Bool
   | number: Int
   | string: Str
-  | negation: "!" Expr
+  > brackets: "(" Expr ")"
+  > negation: "!" Expr
   > left (
     left div: Expr l "/" Expr r
   | left mul: Expr l "*" Expr r
@@ -59,26 +63,19 @@ lexical Int = [1-9][0-9]*;
 
 lexical Bool = "true" | "false";
 
-
 /* Rename refactoring:
  *
  * Write a refactoring transformation that consistently renames all occurrences of the same name.
  * Use the results of name resolution to find the equivalence class of a name.
- */
+*/
  
- //Form rename(Form f, loc useOrDef, str newName, UseDef useDef) {
- //	// find the def
- //	loc d = useOrDef;
- //	for(<loc use, loc def> <- useDef){
- //		if(use == useOrDef) d = def; 		
- //	}
- //	
- //	// get all the uses for the def
- //	list[loc] uses = [ use | <loc use, loc def> <- useDef, def == d] + d;
- //	
- //	
- //	return f;
- //}
+start[Form] rename(start[Form] f, loc useOrDef, str name, UseDef useDef) {
+  set[loc] usesDefs = {use | <loc use, loc def> <- useDef, def == useOrDef} + {def | <loc use, loc def> <- useDef, use == useOrDef};
+ 
+  return visit(f) {
+    case Id x => [Id]name when (x@\loc) in usesDefs
+  }
+}
 
 
 

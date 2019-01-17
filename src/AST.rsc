@@ -11,7 +11,7 @@ data AForm(loc src = |tmp:///|)
   = form(str name, list[AQuestion] questions)
   ; 
 
-data AQuestion(loc src = |tmp:///|)
+data AQuestion(loc src = |tmp:///|, loc nameSource = |tmp:///|)
   = qnormal(str label, str name, AType \type)
   | qcomputed(str label, str name, AType \type, AExpr expr)
   | qifthen(AExpr expr, list[AQuestion] questions)
