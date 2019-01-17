@@ -33,7 +33,7 @@ TEnv collect(AForm f) {
   
   for(/AQuestion q := f.questions) {
   	if(q is qnormal || q is qcomputed)
-  		collection += {<q.src, q.name, q.label, getType(q.\type)>};
+  		collection += {<q.nameSource, q.name, q.label, getType(q.\type)>};
   }
   
   return collection; 
@@ -63,7 +63,7 @@ set[Message] computedQuestionCheck(AQuestion q, TEnv tenv, UseDef useDef) {
 	if(!(q is qcomputed)){
 		return {};
 	}
-	
+
 	return {error("Declared type differs from the expression", q.src) | typeOf(q.expr, tenv, useDef) != getType(q.\type) }
 	 + check(q.expr, tenv, useDef);
 }
@@ -81,9 +81,9 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
     case and(AExpr e1, AExpr e2, src = loc u):
       msgs += { error("And operation needs two booleans", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tbool() };
   	case equal(AExpr e1, AExpr e2, src = loc u):
-  	  msgs += { error("Equals operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
+	  msgs += { error("Equals operation needs two variable of same type", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) };
     case notequal(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Not Equal operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
+      msgs += { error("Not Equal operation needs two variable of same type", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) };
     case larger(AExpr e1, AExpr e2, src = loc u):
       msgs += { error("Larger operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
     case smaller(AExpr e1, AExpr e2, src = loc u):
@@ -110,10 +110,11 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
 
 Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
   switch (e) {
-    case ref(str x, src = loc u):  
+    case ref(str x, src = loc u):  {
       if (<u, loc d> <- useDef, <d, x, _, Type t> <- tenv) {
         return t;
       }
+    }
     case boolean(bool b):
     	return tbool();
     case number(int n):

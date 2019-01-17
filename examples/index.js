@@ -6,7 +6,7 @@ function evalTree(treeLevel, input) {
 
   Object.keys(treeLevel).forEach(function (qName) {
     if (treeLevel[qName] === undefined) { //qnormal
-      if (input.name === qName)
+      if (input && input.name === qName)
         vEnv[qName] = evalExpr(input.value);
     } else if (treeLevel[qName] instanceof Object) { //conditional
       if (evalExpr(treeLevel[qName].condition)) {
