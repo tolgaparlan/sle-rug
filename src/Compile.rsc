@@ -5,7 +5,6 @@ import Resolve;
 import IO;
 import lang::html5::DOM; // see standard library
 
-//import TheirDOM;
 import ParseTree;
 import Syntax;
 import CST2AST; 
