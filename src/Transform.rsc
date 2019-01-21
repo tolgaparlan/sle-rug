@@ -1,5 +1,6 @@
 module Transform
 
+import Syntax;
 import Resolve;
 import AST;
 import IO;
@@ -8,25 +9,6 @@ import IO;
  * Transforming QL forms
  */
  
- 
-/* Normalization:
- *  wrt to the semantics of QL the following
- *     q0: "" int; 
- *     if (a) {
- *       if (b) {
- *         q1: "" int;
- *       } 
- *       q2: "" int; 
- *     }
- *
- *  is equivalent to
- *     if (true) q0: "" int;
- *     if (a && b) q1: "" int;
- *     if (a) q2: "" int;
- *
- * Write a transformation that performs this flattening transformation.
- *
- */
  
 AForm flatten(AForm f) {
   return form(f.name, flattenQ(f.questions, boolean(true))); 
@@ -50,6 +32,5 @@ list[AQuestion] flattenQ(list[AQuestion] questions, AExpr expr){
   return newQuestions; 
 }
 
- 
  
 
