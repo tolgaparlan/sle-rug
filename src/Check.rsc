@@ -77,30 +77,29 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
     case ref(str x, src = loc u):
       msgs += { error("Undeclared question", u) | useDef[u] == {} };
 	case or(AExpr e1, AExpr e2, src = loc u):
-	  msgs += { error("Or operation needs two booleans", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tbool() };
+	  msgs += { error("Or operation needs two booleans", u) | typeOf(e, tenv, useDef) != tbool() };
     case and(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("And operation needs two booleans", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tbool() };
+      msgs += { error("And operation needs two booleans", u) | typeOf(e, tenv, useDef) != tbool() };
   	case equal(AExpr e1, AExpr e2, src = loc u):
 	  msgs += { error("Equals operation needs two variable of same type", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) };
     case notequal(AExpr e1, AExpr e2, src = loc u):
       msgs += { error("Not Equal operation needs two variable of same type", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) };
     case larger(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Larger operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
+      msgs += { error("Larger operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
     case smaller(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Smaller operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
+      msgs += { error("Smaller operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
     case largerequal(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Larger or equal operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
+      msgs += { error("Larger or equal operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
     case smallerequal(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Smaller or equal operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
+      msgs += { error("Smaller or equal operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
     case plus(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Plus operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
-    case minus(AExpr e1, AExpr e2, src = loc u):{
-      msgs += { error("Minus operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
-    }
+      msgs += { error("Plus operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
+    case minus(AExpr e1, AExpr e2, src = loc u):
+      msgs += { error("Minus operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
     case mul(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Multiplication operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
+      msgs += { error("Multiplication operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
     case div(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Division operation needs two integers", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) || typeOf(e2, tenv, useDef) != tint() };
+      msgs += { error("Division operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
     case negation(AExpr e1, src = loc u):
       msgs += { error("Negation operation needs a boolean", u) | typeOf(e1, tenv, useDef) != tbool() };
   }
@@ -122,31 +121,44 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
     case string(str s):
     	return tstr();
     case or(AExpr e1, AExpr e2):
-    	return tbool();
+    	if(typeOf(e1, tenv, useDef) == tbool() && typeOf(e2, tenv, useDef) == tbool())
+    		return tbool();
     case and(AExpr e1, AExpr e2):
-    	return tbool();
+    	if(typeOf(e1, tenv, useDef) == tbool() && typeOf(e2, tenv, useDef) == tbool())
+    		return tbool();
     case equal(AExpr e1, AExpr e2):
-    	return tbool();
+    	if(typeOf(e1, tenv, useDef) == typeOf(e2, tenv, useDef))
+    		return tbool();
     case notequal(AExpr e1, AExpr e2):
-    	return tbool();
+    	if(typeOf(e1, tenv, useDef) == typeOf(e2, tenv, useDef))
+    		return tbool();
     case larger(AExpr e1, AExpr e2):
-    	return tbool();
+    	if(typeOf(e1, tenv, useDef) == tint() && typeOf(e2, tenv, useDef) == tint())
+    		return tbool();
     case smaller(AExpr e1, AExpr e2):
-    	return tbool();
+    	if(typeOf(e1, tenv, useDef) == tint() && typeOf(e2, tenv, useDef) == tint())
+    		return tbool();
     case largerequal(AExpr e1, AExpr e2):
-    	return tbool();
+    	if(typeOf(e1, tenv, useDef) == tint() && typeOf(e2, tenv, useDef) == tint())
+    		return tbool();
     case smallerequal(AExpr e1, AExpr e2):
-    	return tbool();
+    	if(typeOf(e1, tenv, useDef) == tint() && typeOf(e2, tenv, useDef) == tint())
+    		return tbool();
     case plus(AExpr e1, AExpr e2):
-    	return tint();
+    	if(typeOf(e1, tenv, useDef) == tint() && typeOf(e2, tenv, useDef) == tint())
+    		return tint();
     case minus(AExpr e1, AExpr e2):
-    	return tint();
+    	if(typeOf(e1, tenv, useDef) == tint() && typeOf(e2, tenv, useDef) == tint())
+    		return tint();
     case mul(AExpr e1, AExpr e2):
-    	return tint();
+    	if(typeOf(e1, tenv, useDef) == tint() && typeOf(e2, tenv, useDef) == tint())
+    		return tint();
     case div(AExpr e1, AExpr e2):
-    	return tint();
+    	if(typeOf(e1, tenv, useDef) == tint() && typeOf(e2, tenv, useDef) == tint())
+    		return tint();
     case negation(AExpr e1):
-    	return tbool();
+    	if(typeOf(e1, tenv, useDef) == tbool())
+    		return tbool();
   }
   return tunknown(); 
 }
