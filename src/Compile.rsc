@@ -32,7 +32,7 @@ void compile(AForm f) {
 }
 
 void aaa(){
-	compile(cst2ast(parse(#start[Form], |project://QL/examples/a.myql|)));
+	compile(cst2ast(parse(#start[Form], |project://QL/examples/tax.myql|)));
 }
 
 HTML5Node form2html(AForm f) {

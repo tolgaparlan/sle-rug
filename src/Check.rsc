@@ -85,13 +85,13 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
     case notequal(AExpr e1, AExpr e2, src = loc u):
       msgs += { error("Not Equal operation needs two variable of same type", u) | typeOf(e1, tenv, useDef) != typeOf(e2, tenv, useDef) };
     case larger(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Larger operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
+      msgs += { error("Larger operation needs two integers", u) | typeOf(e, tenv, useDef) != tbool() };
     case smaller(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Smaller operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
+      msgs += { error("Smaller operation needs two integers", u) | typeOf(e, tenv, useDef) != tbool() };
     case largerequal(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Larger or equal operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
+      msgs += { error("Larger or equal operation needs two integers", u) | typeOf(e, tenv, useDef) != tbool() };
     case smallerequal(AExpr e1, AExpr e2, src = loc u):
-      msgs += { error("Smaller or equal operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
+      msgs += { error("Smaller or equal operation needs two integers", u) | typeOf(e, tenv, useDef) != tbool() };
     case plus(AExpr e1, AExpr e2, src = loc u):
       msgs += { error("Plus operation needs two integers", u) | typeOf(e, tenv, useDef) != tint() };
     case minus(AExpr e1, AExpr e2, src = loc u):
