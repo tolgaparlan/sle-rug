@@ -4,6 +4,10 @@ import AST;
 import Resolve;
 import IO;
 
+import CST2AST;
+import ParseTree;
+import Syntax;
+
 /*
  * Implement big-step semantics for QL
  */
@@ -42,9 +46,9 @@ VEnv initialEnv(AForm f) {
 	VEnv venv = ();
 	for(/AQuestion q := f.questions) {
 		switch(q){
-			case qnormal(str _, str name, loc _, AType \type):
+			case qnormal(str _, str name, AType \type):
 				venv = venv + (name: defaultValue(\type));
-			case qcomputed(str _, str name, loc _, AType \type, AExpr expr):
+			case qcomputed(str _, str name, AType \type, AExpr expr):
 				venv = venv + (name: defaultValue(\type));
 		}
 	}
